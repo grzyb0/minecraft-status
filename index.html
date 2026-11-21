@@ -2,376 +2,292 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serwer Minecraft</title>
 
-<title>Status serwera Minecraft</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-* {
-    box-sizing: border-box;
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #101114;
+      color: #eeeeee;
+      font-family: Arial, sans-serif;
+    }
 
-body {
-    margin: 0;
-    background: #111315;
-    color: #eeeeee;
-    font-family: Arial, sans-serif;
-}
-
-header {
-    padding: 22px 8%;
-    border-bottom: 1px solid #292d30;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-main {
-    max-width: 700px;
-    margin: 90px auto;
-    padding: 0 20px;
-}
-
-h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
-}
-
-.description {
-    color: #92989e;
-    margin-bottom: 35px;
-}
-
-.server {
-    background: #191c1f;
-    border: 1px solid #303438;
-    padding: 27px;
-    border-radius: 8px;
-}
-
-.status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 19px;
-    font-weight: bold;
-    margin-bottom: 28px;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #888;
-    border-radius: 50%;
-}
-
-.online .dot {
-    background: #45c477;
-}
-
-.offline .dot {
-    background: #e05252;
-}
-
-.error .dot {
-    background: #e5a443;
-}
-
-.online #status {
-    color: #45c477;
-}
-
-.offline #status {
-    color: #e05252;
-}
-
-.error #status {
-    color: #e5a443;
-}
-
-.line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 17px 0;
-    border-top: 1px solid #303438;
-    font-size: 14px;
-}
-
-.label {
-    color: #92989e;
-}
-
-.value {
-    color: #eeeeee;
-    text-align: right;
-}
-
-.ip {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-button {
-    background: #292e32;
-    border: 1px solid #41474c;
-    color: white;
-    padding: 9px 13px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #383f44;
-}
-
-.refresh {
-    margin-top: 22px;
-    width: 100%;
-    padding: 13px;
-}
-
-button:disabled {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-#updated {
-    color: #92989e;
-}
-
-footer {
-    text-align: center;
-    color: #656b70;
-    font-size: 12px;
-    margin-top: 45px;
-}
-
-@media (max-width: 500px) {
-    main {
-        margin-top: 55px;
+    .container {
+      width: 100%;
+      max-width: 440px;
+      padding: 30px;
+      background: #191a1f;
+      border: 1px solid #2b2d35;
+      border-radius: 12px;
     }
 
     h1 {
-        font-size: 26px;
+      margin: 0 0 25px;
+      font-size: 25px;
+      font-weight: 600;
     }
 
-    .line {
-        align-items: flex-start;
+    .status-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #22242b;
+      border-radius: 8px;
+      margin-bottom: 22px;
     }
-}
-</style>
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #888;
+    }
+
+    .online .dot {
+      background: #35c46a;
+    }
+
+    .offline .dot {
+      background: #e05252;
+    }
+
+    .error .dot {
+      background: #e0a33d;
+    }
+
+    .status-text {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .online .status-text {
+      color: #35c46a;
+    }
+
+    .offline .status-text {
+      color: #e05252;
+    }
+
+    .error .status-text {
+      color: #e0a33d;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      color: #999ba5;
+      font-size: 13px;
+    }
+
+    .value {
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .address-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .address {
+      flex: 1;
+      padding: 11px;
+      background: #22242b;
+      border-radius: 6px;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    button {
+      padding: 11px 14px;
+      border: 0;
+      border-radius: 6px;
+      background: #343741;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #454956;
+    }
+
+    .refresh {
+      width: 100%;
+      margin-top: 25px;
+      padding: 13px;
+      background: #3b65c7;
+      font-size: 14px;
+    }
+
+    .refresh:hover {
+      background: #4b76d8;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: #777984;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
+  <main class="container">
+    <h1>Serwer Minecraft</h1>
 
-<header>
-    Serwer Minecraft
-</header>
-
-<main>
-
-    <h1>Status serwera</h1>
-
-    <p class="description">
-        Sprawdź, czy serwer jest aktualnie dostępny.
-    </p>
-
-    <div class="server">
-
-        <div class="status" id="statusBox">
-            <span class="dot"></span>
-            <span id="status">Sprawdzanie...</span>
-        </div>
-
-        <div class="line">
-            <span class="label">Adres serwera</span>
-            <div class="ip">
-                <span class="value" id="address">
-                    serwerminecraftminec.aternos.me
-                </span>
-                <button onclick="copyIP()" id="copyButton">
-                    Kopiuj
-                </button>
-            </div>
-        </div>
-
-        <div class="line">
-            <span class="label">Gracze online</span>
-            <span class="value" id="players">-</span>
-        </div>
-
-        <div class="line">
-            <span class="label">Wersja</span>
-            <span class="value" id="version">-</span>
-        </div>
-
-        <div class="line">
-            <span class="label">Ostatnia aktualizacja</span>
-            <span class="value" id="updated">-</span>
-        </div>
-
-        <button class="refresh" id="refreshButton"
-                onclick="checkServer()">
-            Odśwież status
-        </button>
-
+    <div id="statusBox" class="status-box error">
+      <span class="dot"></span>
+      <span id="status" class="status-text">Sprawdzanie...</span>
     </div>
 
-    <footer>
-        Strona statusu serwera Minecraft
-    </footer>
+    <div class="section">
+      <span class="label">Adres serwera</span>
+      <div class="address-row">
+        <div id="address" class="address">
+          serwerminecraftminec.aternos.me
+        </div>
+        <button id="copyButton" onclick="copyIP()">Kopiuj</button>
+      </div>
+    </div>
 
-</main>
+    <div class="section">
+      <span class="label">Gracze</span>
+      <div id="players" class="value">-- / --</div>
+    </div>
 
-<script>
+    <div class="section">
+      <span class="label">Wersja Minecraft</span>
+      <div id="version" class="value">--</div>
+    </div>
 
-const SERVER = "serwerminecraftminec.aternos.me";
-const API = "https://api.mcstatus.io/v2/status/java/";
+    <div class="section">
+      <span class="label">Ostatnie sprawdzenie</span>
+      <div id="updated" class="value">--</div>
+    </div>
 
-let checking = false;
+    <button id="refreshButton" class="refresh" onclick="checkServer()">
+      Odśwież status
+    </button>
 
-async function checkServer() {
+    <div class="footer">
+      Status aktualizuje się automatycznie co 15 sekund.
+    </div>
+  </main>
 
-    if (checking) return;
-    checking = true;
+  <script>
+    const SERVER = "serwerminecraftminec.aternos.me";
+    const API = "https://api.mcstatus.io/v2/status/java/";
 
-    const status = document.getElementById("status");
-    const box = document.getElementById("statusBox");
-    const players = document.getElementById("players");
-    const version = document.getElementById("version");
-    const updated = document.getElementById("updated");
-    const refresh = document.getElementById("refreshButton");
+    let checking = false;
 
-    refresh.disabled = true;
+    async function checkServer() {
+      if (checking) return;
 
-    status.textContent = "Sprawdzanie...";
-    box.className = "status";
+      checking = true;
 
-    try {
+      const statusBox = document.getElementById("statusBox");
+      const status = document.getElementById("status");
+      const players = document.getElementById("players");
+      const version = document.getElementById("version");
+      const updated = document.getElementById("updated");
+      const refreshButton = document.getElementById("refreshButton");
 
+      refreshButton.disabled = true;
+      refreshButton.textContent = "Sprawdzanie...";
+
+      try {
         const response = await fetch(
-            API + SERVER + "?_=" + Date.now(),
-            { cache: "no-store" }
+          API + SERVER + "?_=" + Date.now(),
+          { cache: "no-store" }
         );
 
         if (!response.ok) {
-            throw new Error("API error");
+          throw new Error("Błąd API: " + response.status);
         }
 
         const data = await response.json();
 
-        // Pobieranie informacji o wersji
-        const versionName =
-            typeof data.version === "string"
-            ? data.version
-            : data.version?.name_clean || "";
+        if (data.online === true) {
+          statusBox.className = "status-box online";
+          status.textContent = "ONLINE";
 
-        // Pobieranie MOTD
-        const motd =
-            data.motd?.clean ||
-            data.motd?.raw ||
-            "";
+          const onlinePlayers = data.players?.online ?? 0;
+          const maxPlayers = data.players?.max ?? "?";
 
-        // Normalizacja tekstu
-        const versionText = versionName
-            .replace(/§[0-9a-fk-or]/gi, "")
-            .toLowerCase()
-            .trim();
+          players.textContent =
+            onlinePlayers + " / " + maxPlayers;
 
-        const motdText = motd
-            .replace(/§[0-9a-fk-or]/gi, "")
-            .toLowerCase()
-            .trim();
+          version.textContent =
+            data.version?.name_clean ??
+            data.version?.name_raw ??
+            "Nieznana";
+        } else if (data.online === false) {
+          statusBox.className = "status-box offline";
+          status.textContent = "OFFLINE";
 
-        // Wykrywanie komunikatów Aternosa
-        const offlineVersion =
-            /\boffline\b/.test(versionText);
-
-        const offlineMotd =
-            motdText.includes("this server is offline") ||
-            motdText.includes("server is offline");
-
-        // Ostateczna decyzja
-        const isOnline =
-            data.online === true &&
-            !offlineVersion &&
-            !offlineMotd;
-
-        if (isOnline) {
-
-            status.textContent = "ONLINE";
-            box.className = "status online";
-
-            players.textContent =
-                (data.players?.online ?? 0) +
-                "/" +
-                (data.players?.max ?? "?");
-
-            version.textContent =
-                versionName || "Nieznana";
-
+          players.textContent = "0 / 0";
+          version.textContent = "Niedostępny";
         } else {
-
-            status.textContent = "OFFLINE";
-            box.className = "status offline";
-
-            players.textContent = "0/-";
-            version.textContent = "Niedostępna";
-
+          throw new Error("Nieprawidłowa odpowiedź API");
         }
 
-    } catch (error) {
+        updated.textContent =
+          new Date().toLocaleTimeString("pl-PL");
 
-        status.textContent = "BRAK DANYCH";
-        box.className = "status error";
+      } catch (error) {
+        statusBox.className = "status-box error";
+        status.textContent = "Błąd sprawdzania";
 
-        players.textContent = "-";
-        version.textContent = "Niedostępna";
+        players.textContent = "-- / --";
+        version.textContent = "--";
 
-        console.error(error);
-
+        updated.textContent =
+          new Date().toLocaleTimeString("pl-PL");
+      } finally {
+        checking = false;
+        refreshButton.disabled = false;
+        refreshButton.textContent = "Odśwież status";
+      }
     }
 
-    updated.textContent =
-        new Date().toLocaleTimeString("pl-PL");
+    async function copyIP() {
+      const address = SERVER;
+      const copyButton = document.getElementById("copyButton");
 
-    refresh.disabled = false;
-    checking = false;
-}
+      try {
+        await navigator.clipboard.writeText(address);
+        copyButton.textContent = "Skopiowano";
 
-function copyIP() {
+        setTimeout(() => {
+          copyButton.textContent = "Kopiuj";
+        }, 1500);
+      } catch (error) {
+        copyButton.textContent = "Nie udało się";
+      }
+    }
 
-    navigator.clipboard.writeText(SERVER)
-        .then(() => {
-
-            const button =
-                document.getElementById("copyButton");
-
-            button.textContent = "Skopiowano!";
-
-            setTimeout(() => {
-                button.textContent = "Kopiuj";
-            }, 1500);
-
-        })
-        .catch(() => {
-            alert("Nie udało się skopiować adresu.");
-        });
-}
-
-// Pierwsze sprawdzenie
-checkServer();
-
-// Automatyczne sprawdzanie co 5 sekund
-setInterval(checkServer, 5000);
-
-</script>
-
+    checkServer();
+    setInterval(checkServer, 15000);
+  </script>
 </body>
 </html>
