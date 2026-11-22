@@ -58,6 +58,7 @@
 
     .online .dot {
       background: #35c46a;
+      box-shadow: 0 0 8px #35c46a66;
     }
 
     .offline .dot {
@@ -124,10 +125,16 @@
       color: white;
       font-size: 13px;
       cursor: pointer;
+      transition: 0.2s;
     }
 
     button:hover {
       background: #454956;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
     }
 
     .refresh {
@@ -152,7 +159,9 @@
 </head>
 
 <body>
+
   <main class="container">
+
     <h1>Serwer Minecraft</h1>
 
     <div id="statusBox" class="status-box error">
@@ -162,11 +171,15 @@
 
     <div class="section">
       <span class="label">Adres serwera</span>
+
       <div class="address-row">
         <div id="address" class="address">
-          serwerminecraftminec.aternos.me
+          serwerminecraftminec.aternos.me:42405
         </div>
-        <button id="copyButton" onclick="copyIP()">Kopiuj</button>
+
+        <button id="copyButton" onclick="copyIP()">
+          Kopiuj
+        </button>
       </div>
     </div>
 
@@ -185,17 +198,25 @@
       <div id="updated" class="value">--</div>
     </div>
 
-    <button id="refreshButton" class="refresh" onclick="checkServer()">
+    <button
+      id="refreshButton"
+      class="refresh"
+      onclick="checkServer()"
+    >
       Odśwież status
     </button>
 
     <div class="footer">
       Status aktualizuje się automatycznie co 15 sekund.
     </div>
+
   </main>
 
   <script>
-    const SERVER = "serwerminecraftminec.aternos.me";
+    // ADRES SERWERA Z PORTEM
+    const SERVER = "serwerminecraftminec.aternos.me:42405";
+
+    // API STATUSU MINECRAFT
     const API = "https://api.mcstatus.io/v2/status/java/";
 
     let checking = false;
@@ -215,39 +236,56 @@
       refreshButton.disabled = true;
       refreshButton.textContent = "Sprawdzanie...";
 
+      const controller = new AbortController();
+
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 10000);
+
       try {
         const response = await fetch(
-          API + SERVER + "?_=" + Date.now(),
-          { cache: "no-store" }
+          API + encodeURIComponent(SERVER),
+          {
+            cache: "no-store",
+            signal: controller.signal
+          }
         );
 
         if (!response.ok) {
-          throw new Error("Błąd API: " + response.status);
+          throw new Error("Błąd API HTTP: " + response.status);
         }
 
         const data = await response.json();
 
+        console.log("Status serwera:", data);
+
         if (data.online === true) {
+
+          // SERWER ONLINE
           statusBox.className = "status-box online";
           status.textContent = "ONLINE";
 
-          const onlinePlayers = data.players?.online ?? 0;
-          const maxPlayers = data.players?.max ?? "?";
-
           players.textContent =
-            onlinePlayers + " / " + maxPlayers;
+            (data.players?.online ?? 0) +
+            " / " +
+            (data.players?.max ?? "?");
 
           version.textContent =
-            data.version?.name_clean ??
-            data.version?.name_raw ??
+            data.version?.name_clean ||
+            data.version?.name_raw ||
             "Nieznana";
+
         } else if (data.online === false) {
+
+          // SERWER OFFLINE
           statusBox.className = "status-box offline";
           status.textContent = "OFFLINE";
 
           players.textContent = "0 / 0";
           version.textContent = "Niedostępny";
+
         } else {
+
           throw new Error("Nieprawidłowa odpowiedź API");
         }
 
@@ -255,15 +293,26 @@
           new Date().toLocaleTimeString("pl-PL");
 
       } catch (error) {
+
+        // BŁĄD SPRAWDZANIA
+        console.error("Błąd:", error);
+
         statusBox.className = "status-box error";
         status.textContent = "Błąd sprawdzania";
 
         players.textContent = "-- / --";
         version.textContent = "--";
 
-        updated.textContent =
-          new Date().toLocaleTimeString("pl-PL");
+        if (error.name === "AbortError") {
+          updated.textContent = "Timeout - API nie odpowiada";
+        } else {
+          updated.textContent = error.message;
+        }
+
       } finally {
+
+        clearTimeout(timeout);
+
         checking = false;
         refreshButton.disabled = false;
         refreshButton.textContent = "Odśwież status";
@@ -271,23 +320,48 @@
     }
 
     async function copyIP() {
-      const address = SERVER;
       const copyButton = document.getElementById("copyButton");
 
       try {
-        await navigator.clipboard.writeText(address);
-        copyButton.textContent = "Skopiowano";
+        await navigator.clipboard.writeText(SERVER);
+
+        copyButton.textContent = "Skopiowano!";
 
         setTimeout(() => {
           copyButton.textContent = "Kopiuj";
         }, 1500);
+
       } catch (error) {
-        copyButton.textContent = "Nie udało się";
+
+        // ZAPASOWA METODA KOPIOWANIA
+        const textarea = document.createElement("textarea");
+        textarea.value = SERVER;
+
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+          document.execCommand("copy");
+          copyButton.textContent = "Skopiowano!";
+        } catch {
+          copyButton.textContent = "Nie udało się";
+        }
+
+        textarea.remove();
+
+        setTimeout(() => {
+          copyButton.textContent = "Kopiuj";
+        }, 1500);
       }
     }
 
+    // Sprawdzenie po załadowaniu strony
     checkServer();
+
+    // Automatyczne sprawdzanie co 15 sekund
     setInterval(checkServer, 15000);
+
   </script>
+
 </body>
 </html>
